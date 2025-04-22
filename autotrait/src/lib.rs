@@ -1,7 +1,4 @@
-//! # autotrait
-//!
-//! A Rust proc-macro crate that provides the `autotrait` attribute.
-//! This allows automatically implementing traits based on a base implementation.
+#![doc = include_str!("../../README.md")]
 
 use unsynn::*;
 
