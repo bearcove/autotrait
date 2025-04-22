@@ -10,6 +10,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "autotrait-sample"
+version = "0.1.0"
+dependencies = [
+ "autotrait",
+]
+
+[[package]]
 name = "mutants"
 version = "0.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"

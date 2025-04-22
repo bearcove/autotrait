@@ -1,0 +1,16 @@
+[package]
+name = "autotrait"
+version = "0.1.0"
+edition = "2024"
+authors = ["Amos Wenger <amos@bearcove.eu>"]
+keywords = ["proc-macro", "derive", "trait", "dynamic-dispatch"]
+categories = ["development-tools::procedural-macros", "rust-patterns"]
+repository = "https://github.com/bearcove/autotrait"
+documentation = "https://docs.rs/autotrait"
+license = "MIT OR Apache-2.0"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+unsynn = "0.0.26"
