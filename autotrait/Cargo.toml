@@ -8,6 +8,7 @@ categories = ["development-tools::procedural-macros", "rust-patterns"]
 repository = "https://github.com/bearcove/autotrait"
 documentation = "https://docs.rs/autotrait"
 license = "MIT OR Apache-2.0"
+description = "Reduces boilerplate by auto-generating trait definitions from impl blocks for dynamic dispatch."
 
 [lib]
 proc-macro = true
