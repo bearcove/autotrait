@@ -13,6 +13,8 @@ keyword! {
     KFn = "fn";
     /// The "self" keyword.
     KSelf = "self";
+    /// The "dyn" keyword.
+    KDyn = "dyn";
 }
 
 operator! {
@@ -51,6 +53,102 @@ unsynn! {
 
     struct Type {
         name: Ident,
+        generics: Option<GenericParams>,
+    }
+
+    /// Parses either a `TokenTree` or `<...>` grouping (which is not a [`Group`] as far as proc-macros
+    /// are concerned).
+    #[derive(Clone)]
+    struct AngleTokenTree(
+        #[allow(clippy::type_complexity)] // look,
+        Either<Cons<Lt, Vec<Cons<Except<Gt>, AngleTokenTree>>, Gt>, TokenTree>,
+    );
+
+    struct GenericParams {
+        lt: AngleTokenTree,
+    }
+
+    enum GenericParam {
+        Ident(Ident),
+        DynType(Cons<KDyn, Ident>),
+    }
+}
+
+impl core::fmt::Display for AngleTokenTree {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match &self.0 {
+            Either::First(it) => {
+                write!(f, "<")?;
+                for it in it.second.iter() {
+                    write!(f, "{}", it.second)?;
+                }
+                write!(f, ">")?;
+            }
+            Either::Second(it) => write!(f, "{}", it)?,
+            Either::Third(Invalid) => unreachable!(),
+            Either::Fourth(Invalid) => unreachable!(),
+        };
+        Ok(())
+    }
+}
+
+impl core::fmt::Display for Function {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "fn {}(", self.name)?;
+        write!(f, "{}", self.params.content)?;
+        write!(f, ")")?;
+        if let Some(ret) = &self.ret {
+            write!(f, " -> {}", ret.second)?;
+        }
+        write!(f, " {{ ... }}")
+    }
+}
+
+impl core::fmt::Display for Params {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut first = true;
+        for param in self.params.0.iter() {
+            if !first {
+                write!(f, ", ")?;
+            }
+            write!(f, "{}", param.value)?;
+            first = false;
+        }
+        Ok(())
+    }
+}
+
+impl core::fmt::Display for Param {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Param::AndSelf(_) => write!(f, "&self"),
+            Param::IdentColon(p) => write!(f, "{}: {}", p.first, p.third),
+        }
+    }
+}
+
+impl core::fmt::Display for Type {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{}", self.name)?;
+        if let Some(generics) = &self.generics {
+            write!(f, "{}", generics.lt)?;
+        }
+        Ok(())
+    }
+}
+
+impl core::fmt::Display for GenericParams {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{}", self.lt)
+    }
+}
+
+impl core::fmt::Display for GenericParam {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            GenericParam::Ident(ident) => write!(f, "{}", ident),
+            GenericParam::DynType(dyn_type) => write!(f, "dyn {}", dyn_type.second),
+        }
     }
 }
 
@@ -72,25 +170,12 @@ pub fn autotrait(
     for f in &b.body.content {
         write!(&mut code, "fn {}(", f.name).unwrap();
         // Handle parameters
-        let mut param_strs = Vec::new();
-        let params = &f.params.content.params.0;
-        for param_delimited in params {
-            let param = &param_delimited.value;
-            match param {
-                Param::AndSelf(_) => param_strs.push("&self".to_string()),
-                Param::IdentColon(param) => {
-                    let name = &param.first;
-                    let typ = &param.third;
-                    param_strs.push(format!("{}: {}", name, typ.name));
-                }
-            }
-        }
-        write!(&mut code, "{}", param_strs.join(", ")).unwrap();
+        write!(&mut code, "{}", f.params.content).unwrap();
         write!(&mut code, ")").unwrap();
 
         // Handle return type
         if let Some(ret) = &f.ret {
-            write!(&mut code, " -> {}", ret.second.name).unwrap();
+            write!(&mut code, " -> {}", ret.second).unwrap();
         }
 
         write!(&mut code, ";").unwrap();
@@ -101,3 +186,5 @@ pub fn autotrait(
     output_stream.extend(TokenStream::from(item_clone));
     output_stream.into()
 }
+
+

@@ -3,8 +3,12 @@ struct ModImpl;
 
 #[autotrait::autotrait]
 impl Mod for ModImpl {
-    fn greet(&self) {
-        println!("Hello, world!");
+    fn client(&self) -> Box<dyn HttpClient> {
+        Box::new(HttpClientImpl::new(None))
+    }
+
+    fn client_with_opts(&self, opts: ClientOpts) -> Box<dyn HttpClient> {
+        Box::new(HttpClientImpl::new(Some(opts)))
     }
 }
 
