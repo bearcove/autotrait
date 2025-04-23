@@ -10,12 +10,13 @@ trait Trait {
 
 And then implement it on something:
 
-```rust
+```rust,ignore
 struct Impl;
 
 impl Trait for Impl {
     fn do_stuff(&self) -> String {
         // do stuff here
+        todo!()
     }
 }
 ```
@@ -29,6 +30,7 @@ struct Impl;
 impl Trait for Impl {
     fn do_stuff(&self) -> String {
         // do stuff here
+        todo!()
     }
 }
 ```

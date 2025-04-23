@@ -273,7 +273,7 @@ impl core::fmt::Display for DynType {
 
 #[proc_macro_attribute]
 pub fn autotrait(
-    _attr: proc_macro::TokenStream,
+    attr: proc_macro::TokenStream,
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     let item_clone = item.clone();
@@ -284,7 +284,12 @@ pub fn autotrait(
 
     use std::fmt::Write;
     let mut code = String::new();
-    write!(&mut code, "trait {} {{", b.trait_name).unwrap();
+    let attr_str = attr.to_string();
+    if attr_str == "! Send" {
+        write!(&mut code, "trait {} {{", b.trait_name).unwrap();
+    } else {
+        write!(&mut code, "trait {}: Send + Sync {{", b.trait_name).unwrap();
+    }
     // Add function declarations to the trait based on functions in the implementation
     for f in &b.body.content {
         write!(&mut code, "fn {}(", f.name).unwrap();

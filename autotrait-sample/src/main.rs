@@ -1,5 +1,6 @@
 use std::{borrow::Cow, collections::HashMap};
 
+use autotrait::autotrait;
 use bytes::Bytes;
 use futures_util::{future::BoxFuture, stream::BoxStream};
 use http::{Error, HeaderName, HeaderValue, Method, StatusCode, Uri};
@@ -10,7 +11,7 @@ struct ClientOpts;
 #[derive(Default)]
 struct ModImpl;
 
-#[autotrait::autotrait]
+#[autotrait(!Send)]
 impl Mod for ModImpl {
     fn box_self(self: Box<Self>) -> Result<Vec<u8>, Error> {
         todo!()
@@ -74,7 +75,7 @@ struct HttpClientImpl {
     //
 }
 
-#[autotrait::autotrait]
+#[autotrait]
 impl HttpClient for HttpClientImpl {
     fn request(&self, _method: Method, _uri: Uri) -> Box<dyn RequestBuilder> {
         Box::new(RequestBuilderImpl {})
@@ -115,7 +116,7 @@ impl ResponseImpl {
     }
 }
 
-#[autotrait::autotrait]
+#[autotrait]
 impl Response for ResponseImpl {
     fn status(&self) -> StatusCode {
         todo!()
@@ -138,7 +139,7 @@ impl Response for ResponseImpl {
     }
 }
 
-#[autotrait::autotrait]
+#[autotrait]
 impl RequestBuilder for RequestBuilderImpl {
     fn body(mut self: Box<Self>, body: Bytes) -> Box<dyn RequestBuilder> {
         todo!()
