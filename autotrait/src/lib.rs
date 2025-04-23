@@ -47,48 +47,46 @@ unsynn! {
     }
 
     enum Param {
-        AndSelf(Cons<And, KSelf>),
-        IdentColon(Cons<Ident, Colon, Type>),
+        ReceiverAndSelf(ReceiverAndSelf),
+        NamedParam(NamedParam),
     }
 
-    struct Type {
-        name: Ident,
-        generics: Option<GenericParams>,
+    struct ReceiverAndSelf {
+        _and: And,
+        _self: KSelf,
     }
 
-    /// Parses either a `TokenTree` or `<...>` grouping (which is not a [`Group`] as far as proc-macros
-    /// are concerned).
-    #[derive(Clone)]
-    struct AngleTokenTree(
-        #[allow(clippy::type_complexity)] // look,
-        Either<Cons<Lt, Vec<Cons<Except<Gt>, AngleTokenTree>>, Gt>, TokenTree>,
-    );
+    struct NamedParam {
+        ident: Ident,
+        _colon: Colon,
+        typ: Type,
+    }
 
-    struct GenericParams {
-        lt: AngleTokenTree,
+    struct SimpleType {
+        // TODO: add path params
+        ident: Ident,
+    }
+
+    enum Type {
+        WithGenerics(WithGenerics),
+        Simple(SimpleType),
+    }
+
+    struct WithGenerics {
+        typ: SimpleType,
+        _lt: Lt,
+        params: Vec<GenericParam>,
+        _gt: Gt,
     }
 
     enum GenericParam {
+        DynType(DynType),
         Ident(Ident),
-        DynType(Cons<KDyn, Ident>),
     }
-}
 
-impl core::fmt::Display for AngleTokenTree {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match &self.0 {
-            Either::First(it) => {
-                write!(f, "<")?;
-                for it in it.second.iter() {
-                    write!(f, "{}", it.second)?;
-                }
-                write!(f, ">")?;
-            }
-            Either::Second(it) => write!(f, "{}", it)?,
-            Either::Third(Invalid) => unreachable!(),
-            Either::Fourth(Invalid) => unreachable!(),
-        };
-        Ok(())
+    struct DynType {
+        _dyn: KDyn,
+        params: Box<Type>,
     }
 }
 
@@ -121,25 +119,33 @@ impl core::fmt::Display for Params {
 impl core::fmt::Display for Param {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Param::AndSelf(_) => write!(f, "&self"),
-            Param::IdentColon(p) => write!(f, "{}: {}", p.first, p.third),
+            Param::ReceiverAndSelf(_) => write!(f, "&self"),
+            Param::NamedParam(p) => write!(f, "{}: {}", p.ident, p.typ),
         }
     }
 }
 
 impl core::fmt::Display for Type {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{}", self.name)?;
-        if let Some(generics) = &self.generics {
-            write!(f, "{}", generics.lt)?;
+        match self {
+            Type::Simple(simple) => write!(f, "{}", simple.ident),
+            Type::WithGenerics(with_generics) => {
+                write!(f, "{}", with_generics.typ.ident)?;
+                if !with_generics.params.is_empty() {
+                    write!(f, "<")?;
+                    let mut first = true;
+                    for param in &with_generics.params {
+                        if !first {
+                            write!(f, ", ")?;
+                        }
+                        write!(f, "{}", param)?;
+                        first = false;
+                    }
+                    write!(f, ">")?;
+                }
+                Ok(())
+            }
         }
-        Ok(())
-    }
-}
-
-impl core::fmt::Display for GenericParams {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{}", self.lt)
     }
 }
 
@@ -147,8 +153,14 @@ impl core::fmt::Display for GenericParam {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             GenericParam::Ident(ident) => write!(f, "{}", ident),
-            GenericParam::DynType(dyn_type) => write!(f, "dyn {}", dyn_type.second),
+            GenericParam::DynType(dyn_type) => write!(f, "{}", dyn_type),
         }
+    }
+}
+
+impl core::fmt::Display for DynType {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "dyn {}", self.params)
     }
 }
 
@@ -186,5 +198,3 @@ pub fn autotrait(
     output_stream.extend(TokenStream::from(item_clone));
     output_stream.into()
 }
-
-
