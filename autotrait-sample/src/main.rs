@@ -11,6 +11,21 @@ struct ClientOpts;
 #[derive(Default)]
 struct ModImpl;
 
+#[autotrait]
+impl Foo for ModImpl {
+    fn make_watcher_1(&self, on_event: Box<dyn Fn()>) {
+        todo!()
+    }
+
+    fn make_watcher_2(&self, on_event: Box<dyn Fn(u32)>) {
+        todo!()
+    }
+
+    fn make_watcher_3(&self, on_event: Box<dyn Fn(u32) -> ()>) {
+        todo!()
+    }
+}
+
 #[autotrait(!Send)]
 impl Mod for ModImpl {
     fn box_self(self: Box<Self>) -> Result<Vec<u8>, Error> {

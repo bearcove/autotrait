@@ -17,6 +17,10 @@ keyword! {
     KDyn = "dyn";
     /// The "mut" keyword.
     KMut = "mut";
+
+    CapitalFn = "Fn";
+    CapitalFnMut = "FnMut";
+    CapitalFnOnce = "FnOnce";
 }
 
 operator! {
@@ -96,16 +100,40 @@ unsynn! {
     }
 
     struct SimpleType {
-        _dyn: Option<KDyn>,
         ident: DelimitedVec<Ident, DoubleColon>,
     }
 
     enum Type {
+        DynTrait(DynTrait),
+        ImplTrait(ImplTrait),
         WithGenerics(WithGenerics),
         Slice(Slice),
         Reference(Reference),
         Tuple(TupleType),
+        Fn(FnType),
         Simple(SimpleType),
+    }
+
+    struct DynTrait {
+        _dyn: KDyn,
+        typ: Box<Type>,
+    }
+
+    struct ImplTrait {
+        _impl: KImpl,
+        typ: Box<Type>,
+    }
+
+    struct FnType {
+        _fn: FnTypeWord,
+        params: ParenthesisGroupContaining<CommaDelimitedVec<Type>>,
+        ret: Option<Cons<RightArrow, Box<Type>>>,
+    }
+
+    enum FnTypeWord {
+        CapitalFn(CapitalFn),
+        CapitalFnMut(CapitalFnMut),
+        CapitalFnOnce(CapitalFnOnce),
     }
 
     struct TupleType {
@@ -139,11 +167,6 @@ unsynn! {
     struct Lifetime {
         _lifetime: LifetimeToken,
         ident: Ident,
-    }
-
-    struct DynType {
-        _dyn: KDyn,
-        params: Box<Type>,
     }
 }
 
@@ -211,10 +234,19 @@ impl core::fmt::Display for SimpleType {
             .map(|ident| ident.value.to_string())
             .collect::<Vec<_>>()
             .join("::");
-        match &self._dyn {
-            Some(_) => write!(f, "dyn {}", path),
-            None => write!(f, "{}", path),
-        }
+        write!(f, "{}", path)
+    }
+}
+
+impl core::fmt::Display for DynTrait {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "dyn {}", self.typ)
+    }
+}
+
+impl core::fmt::Display for ImplTrait {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "impl {}", self.typ)
     }
 }
 
@@ -270,6 +302,34 @@ impl core::fmt::Display for Slice {
         write!(f, "&[{}]", self.element_type.content)
     }
 }
+
+impl core::fmt::Display for FnType {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match &self._fn {
+            FnTypeWord::CapitalFn(_fn_token) => write!(f, "Fn")?,
+            FnTypeWord::CapitalFnMut(_fn_mut_token) => write!(f, "FnMut")?,
+            FnTypeWord::CapitalFnOnce(_fn_once_token) => write!(f, "FnOnce")?,
+        }
+
+        write!(f, "(")?;
+        let mut first = true;
+        for param in &self.params.content.0 {
+            if !first {
+                write!(f, ", ")?;
+            }
+            write!(f, "{}", param.value)?;
+            first = false;
+        }
+        write!(f, ")")?;
+
+        if let Some(ret) = &self.ret {
+            write!(f, " -> {}", ret.second)?;
+        }
+
+        Ok(())
+    }
+}
+
 impl core::fmt::Display for Type {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
@@ -278,6 +338,9 @@ impl core::fmt::Display for Type {
             Type::WithGenerics(with_generics) => write!(f, "{}", with_generics),
             Type::Tuple(tuple) => write!(f, "{}", tuple),
             Type::Slice(slice) => write!(f, "{}", slice),
+            Type::Fn(fn_type) => write!(f, "{}", fn_type),
+            Type::DynTrait(dyn_trait) => write!(f, "{}", dyn_trait),
+            Type::ImplTrait(impl_trait) => write!(f, "{}", impl_trait),
         }
     }
 }
@@ -288,12 +351,6 @@ impl core::fmt::Display for GenericParam {
             GenericParam::Type(typ) => write!(f, "{}", typ),
             GenericParam::Lifetime(lifetime) => write!(f, "'{}", &lifetime.ident),
         }
-    }
-}
-
-impl core::fmt::Display for DynType {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "dyn {}", self.params)
     }
 }
 
