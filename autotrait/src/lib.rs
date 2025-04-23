@@ -28,6 +28,18 @@ operator! {
 
     /// The "'" operator.
     LifetimeToken = "'";
+
+    /// The "#" operator.
+    Pound = "#";
+
+    /// The "::" operator.
+    DoubleColon = "::";
+
+    /// The "(" operator.
+    LeftParen = "(";
+
+    /// The ")" operator.
+    RightParen = ")";
 }
 
 unsynn! {
@@ -40,11 +52,17 @@ unsynn! {
     }
 
     struct Function {
+        attrs: Vec<Attr>,
         _fn: KFn,
         name: Ident,
         params: ParenthesisGroupContaining<Params>,
         ret: Option<Cons<RightArrow, Type>>,
         body: BraceGroup,
+    }
+
+    struct Attr {
+        _hash: Pound,
+        group: BracketGroup,
     }
 
     struct Params {
@@ -71,12 +89,24 @@ unsynn! {
 
     struct SimpleType {
         _dyn: Option<KDyn>,
-        ident: Ident,
+        ident: DelimitedVec<Ident, DoubleColon>,
     }
 
     enum Type {
         WithGenerics(WithGenerics),
+        Reference(Reference),
+        Tuple(TupleType),
         Simple(SimpleType),
+    }
+
+    struct TupleType {
+        types: ParenthesisGroupContaining<CommaDelimitedVec<Type>>,
+    }
+
+    struct Reference {
+        _and: And,
+        _mut: Option<KMut>,
+        typ: Box<Type>,
     }
 
     struct WithGenerics {
@@ -87,8 +117,8 @@ unsynn! {
     }
 
     enum GenericParam {
-        Type(Box<Type>),
         Lifetime(Lifetime),
+        Type(Box<Type>),
     }
 
     struct Lifetime {
@@ -143,29 +173,73 @@ impl core::fmt::Display for Param {
     }
 }
 
+impl core::fmt::Display for SimpleType {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let path = self
+            .ident
+            .0
+            .iter()
+            .map(|ident| ident.value.to_string())
+            .collect::<Vec<_>>()
+            .join("::");
+        match &self._dyn {
+            Some(_) => write!(f, "dyn {}", path),
+            None => write!(f, "{}", path),
+        }
+    }
+}
+
+impl core::fmt::Display for Reference {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "&")?;
+        if self._mut.is_some() {
+            write!(f, "mut ")?;
+        }
+        write!(f, "{}", self.typ)
+    }
+}
+
+impl core::fmt::Display for WithGenerics {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{}", self.typ)?;
+        if !self.params.0.is_empty() {
+            write!(f, "<")?;
+            let mut first = true;
+            for param in &self.params.0 {
+                if !first {
+                    write!(f, ", ")?;
+                }
+                write!(f, "{}", param.value)?;
+                first = false;
+            }
+            write!(f, ">")?;
+        }
+        Ok(())
+    }
+}
+
+impl core::fmt::Display for TupleType {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "(")?;
+        let mut first = true;
+        for typ in &self.types.content.0 {
+            if !first {
+                write!(f, ", ")?;
+            }
+            write!(f, "{}", typ.value)?;
+            first = false;
+        }
+        write!(f, ")")
+    }
+}
+
 impl core::fmt::Display for Type {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Type::Simple(simple) => match &simple._dyn {
-                Some(_) => write!(f, "dyn {}", simple.ident),
-                _ => write!(f, "{}", simple.ident),
-            },
-            Type::WithGenerics(with_generics) => {
-                write!(f, "{}", with_generics.typ.ident)?;
-                if !with_generics.params.0.is_empty() {
-                    write!(f, "<")?;
-                    let mut first = true;
-                    for param in &with_generics.params.0 {
-                        if !first {
-                            write!(f, ", ")?;
-                        }
-                        write!(f, "{}", param.value)?;
-                        first = false;
-                    }
-                    write!(f, ">")?;
-                }
-                Ok(())
-            }
+            Type::Simple(simple) => write!(f, "{}", simple),
+            Type::Reference(reference) => write!(f, "{}", reference),
+            Type::WithGenerics(with_generics) => write!(f, "{}", with_generics),
+            Type::Tuple(tuple) => write!(f, "{}", tuple),
         }
     }
 }
