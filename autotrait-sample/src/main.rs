@@ -28,6 +28,10 @@ impl Mod for ModImpl {
         todo!()
     }
 
+    fn slice_arg(&self, s: &[u8]) {
+        todo!()
+    }
+
     fn and_str(&self, s: &str) {
         todo!()
     }
@@ -187,7 +191,7 @@ impl RequestBuilder for RequestBuilderImpl {
         todo!()
     }
 
-    // fn query(self: Box<Self>, params: &[(&str, &str)]) -> Box<dyn RequestBuilder> {
-    //     todo!()
-    // }
+    fn query(self: Box<Self>, params: &[(&str, &str)]) -> Box<dyn RequestBuilder> {
+        todo!()
+    }
 }

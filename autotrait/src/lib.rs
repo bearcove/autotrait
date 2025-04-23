@@ -94,6 +94,7 @@ unsynn! {
 
     enum Type {
         WithGenerics(WithGenerics),
+        Slice(Slice),
         Reference(Reference),
         Tuple(TupleType),
         Simple(SimpleType),
@@ -101,6 +102,11 @@ unsynn! {
 
     struct TupleType {
         types: ParenthesisGroupContaining<CommaDelimitedVec<Type>>,
+    }
+
+    struct Slice {
+        _and: And,
+        element_type: BracketGroupContaining<Box<Type>>,
     }
 
     struct Reference {
@@ -233,6 +239,11 @@ impl core::fmt::Display for TupleType {
     }
 }
 
+impl core::fmt::Display for Slice {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "&[{}]", self.element_type.content)
+    }
+}
 impl core::fmt::Display for Type {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
@@ -240,6 +251,7 @@ impl core::fmt::Display for Type {
             Type::Reference(reference) => write!(f, "{}", reference),
             Type::WithGenerics(with_generics) => write!(f, "{}", with_generics),
             Type::Tuple(tuple) => write!(f, "{}", tuple),
+            Type::Slice(slice) => write!(f, "{}", slice),
         }
     }
 }
