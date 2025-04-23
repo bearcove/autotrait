@@ -12,6 +12,18 @@ struct ModImpl;
 
 #[autotrait::autotrait]
 impl Mod for ModImpl {
+    fn box_self(self: Box<Self>) -> Result<Vec<u8>, Error> {
+        todo!()
+    }
+
+    fn mut_box_self(mut self: Box<Self>) -> Result<Vec<u8>, Error> {
+        self = todo!();
+    }
+
+    fn mut_ref_self(&mut self) -> Result<Vec<u8>, Error> {
+        *self = todo!();
+    }
+
     fn blah(&self) -> Result<Vec<u8>, Error> {
         todo!()
     }
@@ -64,9 +76,6 @@ impl HttpClient for HttpClientImpl {
 #[allow(dead_code)]
 struct RequestBuilderImpl;
 
-#[autotrait::autotrait]
-impl RequestBuilder for RequestBuilderImpl {}
-
 fn main() {
     let m: Box<dyn Mod> = Box::new(ModImpl);
     m.client();
@@ -103,4 +112,62 @@ impl Response for ResponseImpl {
     fn text(self: Box<Self>) -> BoxFuture<'static, Result<String, Error>> {
         todo!()
     }
+}
+
+#[autotrait::autotrait]
+impl RequestBuilder for RequestBuilderImpl {
+    // fn body(mut self: Box<Self>, body: Bytes) -> Box<dyn RequestBuilder> {
+    //     todo!()
+    // }
+
+    // fn form(mut self: Box<Self>, form: String) -> Box<dyn RequestBuilder> {
+    //     todo!()
+    // }
+
+    // fn header(mut self: Box<Self>, key: HeaderName, value: HeaderValue) -> Box<dyn RequestBuilder> {
+    //     todo!()
+    // }
+
+    // /// Sets a "polite" user agent, letting the server know where to reach us.
+    // fn polite_user_agent(mut self: Box<Self>) -> Box<dyn RequestBuilder> {
+    //     todo!()
+    // }
+
+    // /// Sets a browser-like user agent
+    // fn browser_like_user_agent(mut self: Box<Self>) -> Box<dyn RequestBuilder> {
+    //     todo!()
+    // }
+
+    // fn basic_auth(
+    //     mut self: Box<Self>,
+    //     username: &str,
+    //     password: Option<&str>,
+    // ) -> Box<dyn RequestBuilder> {
+    //     todo!()
+    // }
+
+    // fn bearer_auth(mut self: Box<Self>, token: &str) -> Box<dyn RequestBuilder> {
+    //     todo!()
+    // }
+
+    // fn send(self: Box<Self>) -> BoxFuture<'static, Result<Box<dyn Response>, Error>> {
+    //     todo!()
+    // }
+
+    // fn send_and_expect_200(
+    //     self: Box<Self>,
+    // ) -> BoxFuture<'static, Result<Box<dyn Response>, Error>> {
+    //     todo!()
+    // }
+
+    // fn json(
+    //     self: Box<Self>,
+    //     body: &dyn DynSerialize,
+    // ) -> Result<Box<dyn RequestBuilder>, MerdeError<'static>> {
+    //     todo!()
+    // }
+
+    // fn query(self: Box<Self>, params: &[(&str, &str)]) -> Box<dyn RequestBuilder> {
+    //     todo!()
+    // }
 }

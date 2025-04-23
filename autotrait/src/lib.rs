@@ -15,6 +15,8 @@ keyword! {
     KSelf = "self";
     /// The "dyn" keyword.
     KDyn = "dyn";
+    /// The "mut" keyword.
+    KMut = "mut";
 }
 
 operator! {
@@ -56,10 +58,12 @@ unsynn! {
 
     struct ReceiverAndSelf {
         _and: And,
+        _mut: Option<KMut>,
         _self: KSelf,
     }
 
     struct NamedParam {
+        _mut: Option<KMut>,
         ident: Ident,
         _colon: Colon,
         typ: Type,
@@ -127,7 +131,13 @@ impl core::fmt::Display for Params {
 impl core::fmt::Display for Param {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Param::ReceiverAndSelf(_) => write!(f, "&self"),
+            Param::ReceiverAndSelf(r) => {
+                write!(f, "&")?;
+                if r._mut.is_some() {
+                    write!(f, "mut ")?;
+                }
+                write!(f, "self")
+            }
             Param::NamedParam(p) => write!(f, "{}: {}", p.ident, p.typ),
         }
     }
@@ -136,13 +146,10 @@ impl core::fmt::Display for Param {
 impl core::fmt::Display for Type {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Type::Simple(simple) => {
-                if let Some(_) = &simple._dyn {
-                    write!(f, "dyn {}", simple.ident)
-                } else {
-                    write!(f, "{}", simple.ident)
-                }
-            }
+            Type::Simple(simple) => match &simple._dyn {
+                Some(_) => write!(f, "dyn {}", simple.ident),
+                _ => write!(f, "{}", simple.ident),
+            },
             Type::WithGenerics(with_generics) => {
                 write!(f, "{}", with_generics.typ.ident)?;
                 if !with_generics.params.0.is_empty() {
