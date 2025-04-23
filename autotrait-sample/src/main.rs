@@ -68,6 +68,19 @@ impl Mod for ModImpl {
     fn client_with_opts(&self, _opts: ClientOpts) -> Box<dyn HttpClient> {
         todo!()
     }
+
+    fn has_lifetime<'fut>(&self) {
+        todo!()
+    }
+
+    fn handle_oauth_callback<'fut>(
+        &'fut self,
+        tc: &'fut (),
+        web: (),
+        args: &'fut Cow<'_, str>,
+    ) -> BoxFuture<'fut, Result<Option<Cow<'static, str>>, ()>> {
+        Box::pin(async move { todo!() })
+    }
 }
 
 #[allow(dead_code)]

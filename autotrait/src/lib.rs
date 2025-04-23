@@ -55,9 +55,16 @@ unsynn! {
         attrs: Vec<Attr>,
         _fn: KFn,
         name: Ident,
+        generics: Option<FunctionGenericParams>,
         params: ParenthesisGroupContaining<Params>,
         ret: Option<Cons<RightArrow, Type>>,
         body: BraceGroup,
+    }
+
+    struct FunctionGenericParams {
+        _lt: Lt,
+        params: CommaDelimitedVec<GenericParam>,
+        _gt: Gt,
     }
 
     struct Attr {
@@ -76,6 +83,7 @@ unsynn! {
 
     struct ReceiverAndSelf {
         _and: And,
+        lifetime: Option<Lifetime>,
         _mut: Option<KMut>,
         _self: KSelf,
     }
@@ -111,6 +119,7 @@ unsynn! {
 
     struct Reference {
         _and: And,
+        lifetime: Option<Lifetime>,
         _mut: Option<KMut>,
         typ: Box<Type>,
     }
@@ -140,9 +149,20 @@ unsynn! {
 
 impl core::fmt::Display for Function {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "fn {}(", self.name)?;
-        write!(f, "{}", self.params.content)?;
-        write!(f, ")")?;
+        write!(f, "fn {}", self.name)?;
+        if let Some(generics) = &self.generics {
+            let mut first = true;
+            write!(f, "<")?;
+            for item in &generics.params.0 {
+                if !first {
+                    write!(f, ", ")?;
+                }
+                write!(f, "{}", item.value)?;
+                first = false;
+            }
+            write!(f, ">")?;
+        }
+        write!(f, "({})", self.params.content)?;
         if let Some(ret) = &self.ret {
             write!(f, " -> {}", ret.second)?;
         }
@@ -169,6 +189,9 @@ impl core::fmt::Display for Param {
         match self {
             Param::ReceiverAndSelf(r) => {
                 write!(f, "&")?;
+                if let Some(lifetime) = &r.lifetime {
+                    write!(f, "'{} ", lifetime.ident)?;
+                }
                 if r._mut.is_some() {
                     write!(f, "mut ")?;
                 }
@@ -198,6 +221,9 @@ impl core::fmt::Display for SimpleType {
 impl core::fmt::Display for Reference {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "&")?;
+        if let Some(lifetime) = &self.lifetime {
+            write!(f, "'{} ", lifetime.ident)?;
+        }
         if self._mut.is_some() {
             write!(f, "mut ")?;
         }
@@ -293,10 +319,21 @@ pub fn autotrait(
     write!(&mut code, "pub trait {}{} {{", b.trait_name, bounds).unwrap();
     // Add function declarations to the trait based on functions in the implementation
     for f in &b.body.content {
-        write!(&mut code, "fn {}(", f.name).unwrap();
-        // Handle parameters
-        write!(&mut code, "{}", f.params.content).unwrap();
-        write!(&mut code, ")").unwrap();
+        write!(&mut code, "fn {}", f.name).unwrap();
+        // Write generics if they exist
+        if let Some(generics) = &f.generics {
+            write!(&mut code, "<").unwrap();
+            let mut first = true;
+            for item in &generics.params.0 {
+                if !first {
+                    write!(&mut code, ", ").unwrap();
+                }
+                write!(&mut code, "{}", item.value).unwrap();
+                first = false;
+            }
+            write!(&mut code, ">").unwrap();
+        }
+        write!(&mut code, "({})", f.params.content).unwrap();
 
         // Handle return type
         if let Some(ret) = &f.ret {
