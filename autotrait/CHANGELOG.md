@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2](https://github.com/bearcove/autotrait/compare/autotrait-v0.1.1...autotrait-v0.1.2) - 2025-04-23
+
+### Other
+
+- Add Send bound by default
+
 ## [0.1.1](https://github.com/bearcove/autotrait/compare/autotrait-v0.1.0...autotrait-v0.1.1) - 2025-04-23
 
 ### Other
