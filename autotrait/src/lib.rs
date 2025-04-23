@@ -23,6 +23,9 @@ operator! {
 
     /// The "&" operator.
     And = "&";
+
+    /// The "'" operator.
+    LifetimeToken = "'";
 }
 
 unsynn! {
@@ -63,7 +66,7 @@ unsynn! {
     }
 
     struct SimpleType {
-        // TODO: add path params
+        _dyn: Option<KDyn>,
         ident: Ident,
     }
 
@@ -75,13 +78,18 @@ unsynn! {
     struct WithGenerics {
         typ: SimpleType,
         _lt: Lt,
-        params: Vec<GenericParam>,
+        params: CommaDelimitedVec<GenericParam>,
         _gt: Gt,
     }
 
     enum GenericParam {
-        DynType(DynType),
-        Ident(Ident),
+        Type(Box<Type>),
+        Lifetime(Lifetime),
+    }
+
+    struct Lifetime {
+        _lifetime: LifetimeToken,
+        ident: Ident,
     }
 
     struct DynType {
@@ -128,17 +136,23 @@ impl core::fmt::Display for Param {
 impl core::fmt::Display for Type {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Type::Simple(simple) => write!(f, "{}", simple.ident),
+            Type::Simple(simple) => {
+                if let Some(_) = &simple._dyn {
+                    write!(f, "dyn {}", simple.ident)
+                } else {
+                    write!(f, "{}", simple.ident)
+                }
+            }
             Type::WithGenerics(with_generics) => {
                 write!(f, "{}", with_generics.typ.ident)?;
-                if !with_generics.params.is_empty() {
+                if !with_generics.params.0.is_empty() {
                     write!(f, "<")?;
                     let mut first = true;
-                    for param in &with_generics.params {
+                    for param in &with_generics.params.0 {
                         if !first {
                             write!(f, ", ")?;
                         }
-                        write!(f, "{}", param)?;
+                        write!(f, "{}", param.value)?;
                         first = false;
                     }
                     write!(f, ">")?;
@@ -152,8 +166,8 @@ impl core::fmt::Display for Type {
 impl core::fmt::Display for GenericParam {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            GenericParam::Ident(ident) => write!(f, "{}", ident),
-            GenericParam::DynType(dyn_type) => write!(f, "{}", dyn_type),
+            GenericParam::Type(typ) => write!(f, "{}", typ),
+            GenericParam::Lifetime(lifetime) => write!(f, "'{}", &lifetime.ident),
         }
     }
 }
