@@ -285,11 +285,12 @@ pub fn autotrait(
     use std::fmt::Write;
     let mut code = String::new();
     let attr_str = attr.to_string();
-    if attr_str == "! Send" {
-        write!(&mut code, "trait {} {{", b.trait_name).unwrap();
+    let bounds = if attr_str == "! Send" {
+        ""
     } else {
-        write!(&mut code, "trait {}: Send + Sync {{", b.trait_name).unwrap();
-    }
+        ": Send + Sync"
+    };
+    write!(&mut code, "pub trait {}{} {{", b.trait_name, bounds).unwrap();
     // Add function declarations to the trait based on functions in the implementation
     for f in &b.body.content {
         write!(&mut code, "fn {}(", f.name).unwrap();
