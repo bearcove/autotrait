@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.6](https://github.com/bearcove/autotrait/compare/autotrait-v0.1.5...autotrait-v0.1.6) - 2025-04-24
+
+### Other
+
+- Support '+' in trait objects
+
 ## [0.1.5](https://github.com/bearcove/autotrait/compare/autotrait-v0.1.4...autotrait-v0.1.5) - 2025-04-23
 
 ### Other
