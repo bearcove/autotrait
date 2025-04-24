@@ -63,6 +63,7 @@ unsynn! {
     }
 
     struct ImplBlock {
+        attrs: Vec<Attr>,
         _impl: KImpl,
         trait_name: Ident,
         _for: KFor,
@@ -429,6 +430,9 @@ pub fn autotrait(
     };
 
     let bounds = bounds_str;
+    for attr in &b.attrs {
+        writeln!(&mut code, "#{}", attr.group.tokens_to_string()).unwrap();
+    }
     write!(&mut code, "pub trait {}{} {{", b.trait_name, bounds).unwrap();
     // Add function declarations to the trait based on functions in the implementation
     for f in &b.body.content {
