@@ -21,7 +21,11 @@ impl Foo for ModImpl {
         todo!()
     }
 
-    fn make_watcher_3(&self, on_event: Box<dyn Fn(u32) -> ()>) {
+    fn make_watcher_3(&self, on_event: Box<dyn Fn(u32) -> u64>) {
+        todo!()
+    }
+
+    fn make_watcher_4(&self, on_event: Box<dyn Fn(u32) -> String + Send + Sync>) {
         todo!()
     }
 }

@@ -116,12 +116,12 @@ unsynn! {
 
     struct DynTrait {
         _dyn: KDyn,
-        typ: Box<Type>,
+        traits: DelimitedVec<Box<Type>, Plus>,
     }
 
     struct ImplTrait {
         _impl: KImpl,
-        typ: Box<Type>,
+        traits: DelimitedVec<Box<Type>, Plus>,
     }
 
     struct FnType {
@@ -240,13 +240,31 @@ impl core::fmt::Display for SimpleType {
 
 impl core::fmt::Display for DynTrait {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "dyn {}", self.typ)
+        write!(f, "dyn ")?;
+        let mut first = true;
+        for trait_type in &self.traits.0 {
+            if !first {
+                write!(f, " + ")?;
+            }
+            write!(f, "{}", trait_type.value)?;
+            first = false;
+        }
+        Ok(())
     }
 }
 
 impl core::fmt::Display for ImplTrait {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "impl {}", self.typ)
+        write!(f, "impl ")?;
+        let mut first = true;
+        for trait_type in &self.traits.0 {
+            if !first {
+                write!(f, " + ")?;
+            }
+            write!(f, "{}", trait_type.value)?;
+            first = false;
+        }
+        Ok(())
     }
 }
 
