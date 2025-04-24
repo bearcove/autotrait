@@ -388,6 +388,8 @@ pub fn autotrait(
     let attr_str = attr.to_string();
     let bounds = if attr_str == "! Send" {
         ""
+    } else if attr_str == "! Sync" {
+        ": Send"
     } else {
         ": Send + Sync"
     };
