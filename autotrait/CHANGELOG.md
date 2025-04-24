@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.8](https://github.com/bearcove/autotrait/compare/autotrait-v0.1.7...autotrait-v0.1.8) - 2025-04-24
+
+### Other
+
+- Fix !Send / !Sync bounds to work on rustc as well as ra x)
+
 ## [0.1.7](https://github.com/bearcove/autotrait/compare/autotrait-v0.1.6...autotrait-v0.1.7) - 2025-04-24
 
 ### Other
