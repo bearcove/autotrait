@@ -1,3 +1,5 @@
+#![allow(warnings)]
+
 use std::{borrow::Cow, collections::HashMap};
 
 use autotrait::autotrait;
@@ -256,6 +258,20 @@ struct MutDynImpl {}
 #[autotrait]
 impl MutDyn for MutDynImpl {
     fn render_math(&self, input: &str, mode: (), w: &mut dyn std::io::Write) -> eyre::Result<()> {
+        todo!()
+    }
+}
+
+struct MediaUploaderImpl {}
+
+trait ChunkReceiver {}
+
+#[autotrait]
+impl MediaUploader for MediaUploaderImpl {
+    fn done_and_download_result<'a>(
+        &self,
+        mut chunk_receiver: Box<dyn ChunkReceiver + 'a>,
+    ) -> BoxFuture<'a, Result<(), ()>> {
         todo!()
     }
 }

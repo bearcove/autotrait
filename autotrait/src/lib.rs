@@ -34,7 +34,7 @@ operator! {
     And = "&";
 
     /// The "'" operator.
-    LifetimeToken = "'";
+    SingleQuote = "'";
 
     /// The "#" operator.
     Pound = "#";
@@ -132,7 +132,12 @@ unsynn! {
 
     struct DynTrait {
         _dyn: KDyn,
-        traits: DelimitedVec<Box<Type>, Plus>,
+        traits: DelimitedVec<Box<TypeOrLifetime>, Plus>,
+    }
+
+    enum TypeOrLifetime {
+        Lifetime(Lifetime),
+        Type(Type),
     }
 
     struct ImplTrait {
@@ -182,7 +187,7 @@ unsynn! {
     }
 
     struct Lifetime {
-        _lifetime: LifetimeToken,
+        _lifetime: SingleQuote,
         ident: Ident,
     }
 }
@@ -221,6 +226,15 @@ impl core::fmt::Display for Params {
             first = false;
         }
         Ok(())
+    }
+}
+
+impl core::fmt::Display for TypeOrLifetime {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            TypeOrLifetime::Type(typ) => write!(f, "{}", typ),
+            TypeOrLifetime::Lifetime(lifetime) => write!(f, "'{}", &lifetime.ident),
+        }
     }
 }
 
