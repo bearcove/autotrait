@@ -249,3 +249,13 @@ impl Svg for SvgImpl {
         todo!()
     }
 }
+
+struct MutDynImpl {}
+
+/// Here's a doc comment
+#[autotrait]
+impl MutDyn for MutDynImpl {
+    fn render_math(&self, input: &str, mode: (), w: &mut dyn std::io::Write) -> eyre::Result<()> {
+        todo!()
+    }
+}
