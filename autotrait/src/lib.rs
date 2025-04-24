@@ -157,6 +157,7 @@ unsynn! {
 
     struct Slice {
         _and: And,
+        lifetime: Option<Lifetime>,
         element_type: BracketGroupContaining<Box<Type>>,
     }
 
@@ -332,7 +333,11 @@ impl core::fmt::Display for TupleType {
 
 impl core::fmt::Display for Slice {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "&[{}]", self.element_type.content)
+        write!(f, "&")?;
+        if let Some(lifetime) = &self.lifetime {
+            write!(f, "'{} ", lifetime.ident)?;
+        }
+        write!(f, "[{}]", self.element_type.content)
     }
 }
 

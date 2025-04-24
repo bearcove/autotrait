@@ -236,3 +236,16 @@ impl NotSync for MultipartUploadWrapper {}
 
 #[autotrait(!Send)]
 impl NotSend for MultipartUploadWrapper {}
+
+struct SvgImpl {}
+
+#[autotrait]
+impl Svg for SvgImpl {
+    fn inject_font_faces<'future>(
+        &'future self,
+        input: &'future [u8],
+        font_faces: &'future u8,
+    ) -> BoxFuture<'future, Result<Vec<u8>, ()>> {
+        todo!()
+    }
+}
