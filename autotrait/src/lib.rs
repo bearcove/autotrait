@@ -9,6 +9,8 @@ keyword! {
     KImpl = "impl";
     /// The "for" keyword.
     KFor = "for";
+    /// The "async" keyword
+    KAsync = "async";
     /// The "fn" keyword.
     KFn = "fn";
     /// The "self" keyword.
@@ -73,6 +75,7 @@ unsynn! {
 
     struct Function {
         attrs: Vec<Attr>,
+        _async: Option<KAsync>,
         _fn: KFn,
         name: Ident,
         generics: Option<FunctionGenericParams>,
@@ -450,6 +453,9 @@ pub fn autotrait(
     write!(&mut code, "pub trait {}{} {{", b.trait_name, bounds).unwrap();
     // Add function declarations to the trait based on functions in the implementation
     for f in &b.body.content {
+        if f._async.is_some() {
+            write!(&mut code, "async ").unwrap();
+        }
         write!(&mut code, "fn {}", f.name).unwrap();
         // Write generics if they exist
         if let Some(generics) = &f.generics {

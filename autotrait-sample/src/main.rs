@@ -275,3 +275,61 @@ impl MediaUploader for MediaUploaderImpl {
         todo!()
     }
 }
+
+struct HasAsyncFnImpl;
+
+#[autotrait]
+impl HasAsyncFn for HasAsyncFnImpl {
+    async fn async_fn(&self) -> Result<(), ()> {
+        todo!()
+    }
+}
+
+struct Bot;
+
+type Message = ();
+type RequestError = ();
+type Router<T> = (T);
+type AsyncError = ();
+type Url = ();
+
+#[autotrait]
+impl BotExt for Bot {
+    async fn reply(&self, message: &Message, text: &str) -> Result<Message, RequestError> {
+        todo!()
+    }
+
+    async fn try_reply(&self, message: &Message, text: &str) -> Result<Message, RequestError> {
+        todo!()
+    }
+
+    async fn try_reply_silent(
+        &self,
+        message: &Message,
+        text: &str,
+    ) -> Result<Message, RequestError> {
+        todo!()
+    }
+
+    async fn replace_chat_message(
+        &self,
+        message: &Message,
+        text: &str,
+    ) -> Result<Message, RequestError> {
+        todo!()
+    }
+
+    fn is_self_message(&self, message: &Message) -> bool {
+        todo!()
+    }
+
+    async fn perform_replacement(
+        &self,
+        message: &Message,
+        url_matcher: &Router<()>,
+        preview_domain: &str,
+        get_button_data: impl Fn(&Url) -> Option<(&str, Url)>,
+    ) -> Result<(), AsyncError> {
+        todo!()
+    }
+}
