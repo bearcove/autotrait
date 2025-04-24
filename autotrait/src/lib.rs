@@ -21,6 +21,9 @@ keyword! {
     CapitalFn = "Fn";
     CapitalFnMut = "FnMut";
     CapitalFnOnce = "FnOnce";
+
+    KUpperSend = "Send";
+    KUpperSync = "Sync";
 }
 
 operator! {
@@ -44,9 +47,21 @@ operator! {
 
     /// The ")" operator.
     RightParen = ")";
+
+    /// The "!" operator
+    Not = "!";
 }
 
 unsynn! {
+    struct AttrBounds {
+        bounds: CommaDelimitedVec<AttrBound>
+    }
+
+    enum AttrBound {
+        NotSend(Cons<Not, KUpperSend>),
+        NotSync(Cons<Not, KUpperSync>),
+    }
+
     struct ImplBlock {
         _impl: KImpl,
         trait_name: Ident,
@@ -385,14 +400,30 @@ pub fn autotrait(
 
     use std::fmt::Write;
     let mut code = String::new();
-    let attr_str = attr.to_string();
-    let bounds = if attr_str == "! Send" {
+    let attr_bounds = TokenStream::from(attr)
+        .to_token_iter()
+        .parse::<AttrBounds>()
+        .expect("Failed to parse attribute bounds");
+
+    let mut has_not_send = false;
+    let mut has_not_sync = false;
+
+    for bound in &attr_bounds.bounds.0 {
+        match &bound.value {
+            AttrBound::NotSend(_) => has_not_send = true,
+            AttrBound::NotSync(_) => has_not_sync = true,
+        }
+    }
+
+    let bounds_str = if has_not_send {
         ""
-    } else if attr_str == "! Sync" {
+    } else if has_not_sync {
         ": Send"
     } else {
         ": Send + Sync"
     };
+
+    let bounds = bounds_str;
     write!(&mut code, "pub trait {}{} {{", b.trait_name, bounds).unwrap();
     // Add function declarations to the trait based on functions in the implementation
     for f in &b.body.content {

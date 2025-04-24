@@ -228,3 +228,11 @@ impl RequestBuilder for RequestBuilderImpl {
         todo!()
     }
 }
+
+struct MultipartUploadWrapper {}
+
+#[autotrait(!Sync)]
+impl NotSync for MultipartUploadWrapper {}
+
+#[autotrait(!Send)]
+impl NotSend for MultipartUploadWrapper {}
