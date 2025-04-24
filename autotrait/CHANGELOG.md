@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.12](https://github.com/bearcove/autotrait/compare/autotrait-v0.1.11...autotrait-v0.1.12) - 2025-04-24
+
+### Other
+
+- Support async fn in trait
+
 ## [0.1.11](https://github.com/bearcove/autotrait/compare/autotrait-v0.1.10...autotrait-v0.1.11) - 2025-04-24
 
 ### Other
