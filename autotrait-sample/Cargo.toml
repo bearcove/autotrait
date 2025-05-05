@@ -12,7 +12,7 @@ keywords = ["proc-macro", "derive", "trait", "dynamic-dispatch"]
 categories = ["proc-macro", "derive", "trait", "dynamic-dispatch"]
 
 [dependencies]
-autotrait = { version = "0.1.12", path = "../autotrait" }
+autotrait = { version = "0.2.0", path = "../autotrait" }
 bytes = "1.10.1"
 eyre = "0.6.12"
 futures-util = "0.3.31"
