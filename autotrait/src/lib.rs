@@ -489,8 +489,7 @@ pub fn autotrait(
 
     let trait_name = &b.trait_name;
     let attrs = b.attrs.iter().map(|attr| {
-        let attr_content = attr.group.tokens_to_string();
-        quote! { #[#attr_content] }
+        quote! { #attr }
     });
 
     let functions = b.body.content.iter().map(|f| {
@@ -537,4 +536,11 @@ pub fn autotrait(
     output.extend(item_ts);
 
     output.into()
+}
+
+impl quote::ToTokens for Attr {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        tokens.append(Punct::new('#', Spacing::Joint));
+        self.group.to_tokens(tokens);
+    }
 }
