@@ -14,4 +14,5 @@ description = "Reduces boilerplate by auto-generating trait definitions from imp
 proc-macro = true
 
 [dependencies]
+quote = "1.0.40"
 unsynn = "0.0.26"
