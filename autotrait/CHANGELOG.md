@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1](https://github.com/bearcove/autotrait/compare/autotrait-v0.2.0...autotrait-v0.2.1) - 2025-05-08
+
+### Dependencies
+
+- Upgrade unsynn from 0.0.26 to 0.1.0
+
 ## [0.1.12](https://github.com/bearcove/autotrait/compare/autotrait-v0.1.11...autotrait-v0.1.12) - 2025-04-24
 
 ### Other
