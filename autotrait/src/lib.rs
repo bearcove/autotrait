@@ -132,23 +132,23 @@ unsynn! {
     }
 
     struct SimpleType {
-        ident: DelimitedVec<Ident, DoubleColon>,
+        ident: DelimitedVec<Ident, DoubleColon, TrailingDelimiter::Forbidden, 1>,
     }
 
     enum Type {
         DynTrait(DynTrait),
         ImplTrait(ImplTrait),
-        WithGenerics(WithGenerics),
-        Slice(Slice),
         Reference(Reference),
+        Slice(Slice),
         Tuple(TupleType),
         Fn(FnType),
+        WithGenerics(WithGenerics),
         Simple(SimpleType),
     }
 
     struct DynTrait {
         _dyn: KDyn,
-        traits: DelimitedVec<Box<TypeOrLifetime>, Plus>,
+        traits: DelimitedVec<Box<TypeOrLifetime>, Plus, TrailingDelimiter::Forbidden, 1>,
     }
 
     enum TypeOrLifetime {
@@ -158,7 +158,7 @@ unsynn! {
 
     struct ImplTrait {
         _impl: KImpl,
-        traits: DelimitedVec<Box<Type>, Plus>,
+        traits: DelimitedVec<Box<Type>, Plus, TrailingDelimiter::Forbidden, 1>,
     }
 
     struct FnType {
