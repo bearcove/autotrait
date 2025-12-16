@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3](https://github.com/bearcove/autotrait/compare/autotrait-v0.2.2...autotrait-v0.2.3) - 2025-12-16
+
+### Other
+
+- Fix infinite loop bug
+
 ## [0.2.2](https://github.com/bearcove/autotrait/compare/autotrait-v0.2.1...autotrait-v0.2.2) - 2025-12-16
 
 ### Other
