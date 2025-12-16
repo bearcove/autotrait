@@ -213,7 +213,7 @@ impl quote::ToTokens for Function {
         let name = &self.name;
 
         let generics = if let Some(generics) = &self.generics {
-            let params = generics.params.0.iter().map(|param| &param.value);
+            let params = generics.params.iter().map(|param| &param.value);
             quote! { < #(#params),* > }
         } else {
             quote! {}
@@ -239,7 +239,7 @@ impl quote::ToTokens for Function {
 
 impl quote::ToTokens for Params {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let params = self.params.0.iter().map(|param| &param.value);
+        let params = self.params.iter().map(|param| &param.value);
         quote::ToTokens::to_tokens(
             &quote! {
                 #(#params),*
@@ -290,7 +290,7 @@ impl quote::ToTokens for Param {
 
 impl quote::ToTokens for SimpleType {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let idents = self.ident.0.iter().map(|ident| &ident.value);
+        let idents = self.ident.iter().map(|ident| &ident.value);
         quote::ToTokens::to_tokens(
             &quote! {
                 #(#idents)::*
@@ -302,7 +302,7 @@ impl quote::ToTokens for SimpleType {
 
 impl quote::ToTokens for DynTrait {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let traits = self.traits.0.iter().map(|trait_type| &trait_type.value);
+        let traits = (&self.traits).iter().map(|trait_type| &trait_type.value);
         quote::ToTokens::to_tokens(
             &quote! {
                 dyn #(#traits)+*
@@ -314,7 +314,7 @@ impl quote::ToTokens for DynTrait {
 
 impl quote::ToTokens for ImplTrait {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let traits = self.traits.0.iter().map(|trait_type| &trait_type.value);
+        let traits = (&self.traits).iter().map(|trait_type| &trait_type.value);
         quote::ToTokens::to_tokens(
             &quote! {
                 impl #(#traits)+*
@@ -354,10 +354,10 @@ impl quote::ToTokens for WithGenerics {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let typ = &self.typ;
 
-        if self.params.0.is_empty() {
+        if (&self.params).iter().next().is_none() {
             quote::ToTokens::to_tokens(&typ, tokens);
         } else {
-            let params = self.params.0.iter().map(|param| &param.value);
+            let params = (&self.params).iter().map(|param| &param.value);
             quote::ToTokens::to_tokens(
                 &quote! {
                     #typ < #(#params),* >
@@ -370,7 +370,7 @@ impl quote::ToTokens for WithGenerics {
 
 impl quote::ToTokens for TupleType {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let types = self.types.content.0.iter().map(|typ| &typ.value);
+        let types = (&self.types.content).iter().map(|typ| &typ.value);
         quote::ToTokens::to_tokens(
             &quote! {
                 ( #(#types),* )
@@ -408,7 +408,7 @@ impl quote::ToTokens for FnType {
             FnTypeWord::CapitalFnOnce(_) => format_ident!("FnOnce"),
         };
 
-        let params = self.params.content.0.iter().map(|param| &param.value);
+        let params = (&self.params.content).iter().map(|param| &param.value);
 
         let return_type = if let Some(ret) = &self.ret {
             let ret_type = &ret.second;
@@ -472,7 +472,7 @@ pub fn autotrait(
     let mut has_not_send = false;
     let mut has_not_sync = false;
 
-    for bound in &attr_bounds.bounds.0 {
+    for bound in attr_bounds.bounds.iter() {
         match &bound.value {
             AttrBound::NotSend(_) => has_not_send = true,
             AttrBound::NotSync(_) => has_not_sync = true,
@@ -502,7 +502,7 @@ pub fn autotrait(
         let fn_name = &f.name;
 
         let generics = if let Some(generics) = &f.generics {
-            let params = generics.params.0.iter().map(|param| &param.value);
+            let params = (&generics.params).iter().map(|param| &param.value);
             quote! { < #(#params),* > }
         } else {
             quote! {}
